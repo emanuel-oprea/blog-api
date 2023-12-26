@@ -1,0 +1,155 @@
+openapi: 3.0.0
+info:
+  description: API for managing blog.
+  title: Blog API
+  version: 1.0.0
+servers:
+- url: /
+paths:
+  /login:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+          description: Successful login
+        "401":
+          description: Authentication failed
+      summary: Authenticate user and retrieve token
+  /users:
+    get:
+      responses:
+        "200":
+          description: OK
+      security:
+      - BearerAuth: []
+      summary: Get a list of users
+  /users/{userId}:
+    get:
+      parameters:
+      - explode: false
+        in: path
+        name: userId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: OK
+      security:
+      - BearerAuth: []
+      summary: Get a user by ID
+  /posts:
+    get:
+      responses:
+        "200":
+          description: OK
+      security:
+      - BearerAuth: []
+      summary: Get a list of posts
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Post'
+        required: true
+      responses:
+        "201":
+          description: Created
+      security:
+      - BearerAuth: []
+      summary: Create a new post
+  /posts/{postId}:
+    get:
+      parameters:
+      - explode: false
+        in: path
+        name: postId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: OK
+      security:
+      - BearerAuth: []
+      summary: Get a post by ID
+components:
+  schemas:
+    User:
+      example:
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        email: email
+        username: username
+      properties:
+        id:
+          format: uuid
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+      type: object
+    Post:
+      example:
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        title: title
+        userId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        content: content
+      properties:
+        id:
+          format: uuid
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        userId:
+          format: uuid
+          type: string
+      type: object
+    LoginRequest:
+      example:
+        password: password
+        username: username
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+      - password
+      - username
+      type: object
+    LoginResponse:
+      example:
+        user:
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          email: email
+          username: username
+        token: token
+      properties:
+        token:
+          format: jwt
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+      type: object
+  securitySchemes:
+    BearerAuth:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http
